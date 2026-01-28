@@ -4,6 +4,8 @@ __pycache__/
 *.pyo
 *.pyd
 *.egg-info/
+.pytest_cache/
+*.pyc
 
 # Virtual env
 .venv/
@@ -26,3 +28,6 @@ htmlcov/
 
 # Docker
 *.pid
+
+# Dev files
+*.egg-info/
