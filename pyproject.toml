@@ -24,9 +24,24 @@ dev = [
 line-length = 100
 target-version = "py312"
 
+select = [
+  "E",  # pycodestyle
+  "F",  # pyflakes
+  "I",  # import sorting
+  "UP", # pyupgrade
+]
+
+ignore = [
+  "E501", # line length handled by formatter
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B"]
-ignore = []
+select = ["E", "F", "B", "I", "UP"]
+ignore = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

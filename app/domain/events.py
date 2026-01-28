@@ -12,6 +12,7 @@ EventType = Literal[
     "AccountReinstated",
 ]
 
+
 @dataclass(frozen=True)
 class EventEnvelope:
     event_type: EventType

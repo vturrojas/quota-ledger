@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from sqlalchemy import JSON, Column, Integer, String
 
-from app.infra.event_store.models import Base
+from app.infra.db.base import Base
 
 
 class AccountCurrent(Base):

@@ -14,6 +14,7 @@ from app.domain.errors import InvariantViolation, NotFound
 from app.domain.events import EventEnvelope
 from app.domain.types import AccountQuotaState
 
+
 def apply_event(state: AccountQuotaState, e: EventEnvelope) -> AccountQuotaState:
     t = e.event_type
     p = e.payload
@@ -49,6 +50,7 @@ def apply_event(state: AccountQuotaState, e: EventEnvelope) -> AccountQuotaState
         return replace(state, status="active")
 
     return state
+
 
 def decide(state: AccountQuotaState, cmd) -> list[EventEnvelope]:
     # NOTE: limits/plan resolution happens in the app/service layer for simplicity.

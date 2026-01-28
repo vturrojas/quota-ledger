@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
+from app.domain.aggregate import apply_event
 from app.domain.errors import ConcurrencyConflict
 from app.domain.events import EventEnvelope
-from app.domain.aggregate import apply_event
 from app.domain.types import AccountQuotaState
-
 from app.infra.db.session import SessionLocal
 from app.infra.event_store.models import Event
 from app.infra.projections.models import AccountCurrent
@@ -25,7 +23,7 @@ def _parse_occurred_at(value: str) -> datetime:
       - ISO8601 with offset
     """
     if value == "now":
-        return datetime.now(timezone.utc)
+        return datetime.now(UTC)
 
     # Handle trailing Z
     if value.endswith("Z"):
@@ -33,12 +31,12 @@ def _parse_occurred_at(value: str) -> datetime:
 
     dt = datetime.fromisoformat(value)
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
     return dt
 
 
 def _to_envelope(row: Event) -> EventEnvelope:
-    occurred_at = row.occurred_at.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    occurred_at = row.occurred_at.astimezone(UTC).isoformat().replace("+00:00", "Z")
     return EventEnvelope(
         event_type=row.event_type,  # type: ignore[arg-type]
         schema_version=row.event_schema_version,
@@ -61,7 +59,9 @@ class SqlAlchemyEventStore:
         with SessionLocal() as session:
             # Determine current version in DB
             current_version = session.execute(
-                select(func.coalesce(func.max(Event.stream_version), 0)).where(Event.stream_id == stream_id)
+                select(func.coalesce(func.max(Event.stream_version), 0)).where(
+                    Event.stream_id == stream_id
+                )
             ).scalar_one()
 
             # Idempotency: if the first new event has an idempotency_key, and we already have it,
@@ -98,11 +98,15 @@ class SqlAlchemyEventStore:
                 session.flush()
 
             # load existing events in this tx (cheap for now)
-            rows = session.execute(
-                select(Event)
-                .where(Event.stream_id == stream_id)
-                .order_by(Event.stream_version.asc())
-            ).scalars().all()
+            rows = (
+                session.execute(
+                    select(Event)
+                    .where(Event.stream_id == stream_id)
+                    .order_by(Event.stream_version.asc())
+                )
+                .scalars()
+                .all()
+            )
 
             state = AccountQuotaState()
             for r in rows:
@@ -140,16 +144,26 @@ class SqlAlchemyEventStore:
 
     def load_stream(self, stream_id: str) -> list[EventEnvelope]:
         with SessionLocal() as session:
-            rows = session.execute(
-                select(Event).where(Event.stream_id == stream_id).order_by(Event.stream_version.asc())
-            ).scalars().all()
+            rows = (
+                session.execute(
+                    select(Event)
+                    .where(Event.stream_id == stream_id)
+                    .order_by(Event.stream_version.asc())
+                )
+                .scalars()
+                .all()
+            )
             return [_to_envelope(r) for r in rows]
 
     def load_stream_since(self, stream_id: str, since_version: int) -> list[EventEnvelope]:
         with SessionLocal() as session:
-            rows = session.execute(
-                select(Event)
-                .where(Event.stream_id == stream_id, Event.stream_version > since_version)
-                .order_by(Event.stream_version.asc())
-            ).scalars().all()
+            rows = (
+                session.execute(
+                    select(Event)
+                    .where(Event.stream_id == stream_id, Event.stream_version > since_version)
+                    .order_by(Event.stream_version.asc())
+                )
+                .scalars()
+                .all()
+            )
             return [_to_envelope(r) for r in rows]

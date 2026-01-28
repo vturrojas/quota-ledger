@@ -22,8 +22,8 @@ venv:
 	python3 -m venv .venv
 
 install:
-	. .venv/bin/activate && pip install -U pip && pip install -e ".[dev]"
-
+	. .venv/bin/activate && pip install -U pip && \
+	(if [ -f requirements.txt ]; then pip install -r requirements-dev.txt; else pip install -e .[dev]; fi)
 fmt:
 	. .venv/bin/activate && ruff format . && ruff check . --fix
 

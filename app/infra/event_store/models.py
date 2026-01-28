@@ -1,9 +1,18 @@
 from __future__ import annotations
 
-from sqlalchemy import JSON, BigInteger, Column, DateTime, Integer, String, Text, UniqueConstraint, func
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import (
+    JSON,
+    BigInteger,
+    Column,
+    DateTime,
+    Integer,
+    String,
+    UniqueConstraint,
+    func,
+)
 
-Base = declarative_base()
+from app.infra.db.base import Base
+
 
 class Event(Base):
     __tablename__ = "events"

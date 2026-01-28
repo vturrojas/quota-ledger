@@ -5,6 +5,7 @@ from typing import Literal
 
 Meter = Literal["api_calls", "storage_mb"]
 
+
 @dataclass(frozen=True)
 class Plan:
     plan_id: str

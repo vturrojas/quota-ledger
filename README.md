@@ -76,6 +76,15 @@ This service enforces a few explicit domain rules:
 
 ---
 
+## Design decisions
+
+- Commands raise domain-specific errors (`NotFound`, `InvariantViolation`)
+  instead of generic exceptions.
+- Invariants are enforced in the domain layer, not the API layer.
+- Projections are updated transactionally for simplicity and correctness.
+
+---
+
 ## What this does NOT demonstrate
 
 This project does not attempt to demonstrate horizontal scalability, cross-service messaging,
@@ -121,6 +130,16 @@ List events (audit trail):
 ```bash
 curl -s http://127.0.0.1:8001/v1/accounts/a1/events | jq
 ```
+
+---
+
+## Development
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+make test
 
 ---
 

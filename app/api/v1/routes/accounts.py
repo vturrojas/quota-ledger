@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
 
-from app.domain.commands import CreateAccount, RecordUsage, SuspendAccount, ReinstateAccount
+from app.domain.commands import CreateAccount, RecordUsage, ReinstateAccount, SuspendAccount
 from app.domain.errors import InvariantViolation, NotFound
 from app.infra.event_store.repository import SqlAlchemyEventStore
 from app.services.account_service import AccountService
@@ -37,7 +37,7 @@ def create_account(req: CreateAccountRequest) -> dict:
             )
         )
     except InvariantViolation as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        raise HTTPException(status_code=409, detail=str(e)) from None
     return {"account_id": req.account_id, "stream_version": version}
 
 
@@ -47,7 +47,7 @@ def get_account(account_id: str) -> dict:
     try:
         return svc.get_state(account_id)
     except NotFound as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from None
 
 
 @router.get("/{account_id}/events")
@@ -70,7 +70,7 @@ def record_usage(
         version = svc.record_usage(
             RecordUsage(
                 account_id=account_id,
-                meter=req.meter,      # we’ll tighten to Literal later
+                meter=req.meter,  # we’ll tighten to Literal later
                 units=req.units,
                 occurred_at=req.occurred_at,
                 idempotency_key=idempotency_key,
@@ -78,9 +78,9 @@ def record_usage(
         )
         return {"account_id": account_id, "stream_version": version}
     except NotFound as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from None
     except InvariantViolation as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        raise HTTPException(status_code=409, detail=str(e)) from None
 
 
 @router.post("/{account_id}/suspend")
@@ -90,9 +90,9 @@ def suspend_account(account_id: str, req: SuspendAccountRequest) -> dict:
         version = svc.suspend_account(SuspendAccount(account_id=account_id, reason=req.reason))
         return {"account_id": account_id, "stream_version": version}
     except NotFound as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from None
     except InvariantViolation as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        raise HTTPException(status_code=409, detail=str(e)) from None
 
 
 @router.post("/{account_id}/reinstate")
@@ -102,6 +102,6 @@ def reinstate_account(account_id: str) -> dict:
         version = svc.reinstate_account(ReinstateAccount(account_id=account_id))
         return {"account_id": account_id, "stream_version": version}
     except NotFound as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from None
     except InvariantViolation as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        raise HTTPException(status_code=409, detail=str(e)) from None

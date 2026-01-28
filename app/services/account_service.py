@@ -7,7 +7,7 @@ from app.domain.commands import (
     ReinstateAccount,
     SuspendAccount,
 )
-from app.domain.errors import InvariantViolation, NotFound
+from app.domain.errors import NotFound
 from app.domain.types import AccountQuotaState
 from app.infra.db.session import SessionLocal
 from app.infra.event_store.repository import SqlAlchemyEventStore
@@ -125,7 +125,9 @@ class AccountService:
             {
                 "type": e.event_type,
                 "schema_version": e.schema_version,
-                "occurred_at": e.occurred_at.isoformat() if hasattr(e.occurred_at, "isoformat") else str(e.occurred_at),
+                "occurred_at": e.occurred_at.isoformat()
+                if hasattr(e.occurred_at, "isoformat")
+                else str(e.occurred_at),
                 "idempotency_key": e.idempotency_key,
                 "payload": e.payload,
             }
