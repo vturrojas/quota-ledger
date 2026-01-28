@@ -1,3 +1,5 @@
+[![CI](https://github.com/vturrojas/quota-ledger/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/vturrojas/quota-ledger/actions/workflows/tests.yml)
+
 # QuotaLedger (event-sourced)
 
 A small, production-style event-sourced service for **account quotas & rate plans**.
