@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+
+# Virtual env
+.venv/
+venv/
+
+# Env files
+.env
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log
+
+# Test / coverage
+.coverage
+htmlcov/
+
+# Docker
+*.pid
